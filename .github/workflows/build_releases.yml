@@ -20,9 +20,11 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
       - run: flutter build windows --release
-      - uses: softprops/action-gh-release@v1
+      - name: Compress Windows Release Bundle
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath build/TejaBeats-Windows.zip -Force
+      - uses: softprops/action-gh-release@v2
         with:
-          files: build/windows/x64/runner/Release/bloomee.exe
+          files: build/TejaBeats-Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -40,7 +42,7 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
       - run: flutter build apk --release
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
