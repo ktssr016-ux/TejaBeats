@@ -1,0 +1,16 @@
+{
+  "name": "bloomee-root",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "ghpage"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=bloomee",
+    "build": "npm run build --workspace=bloomee",
+    "build:gh-pages": "npm run build:gh-pages --workspace=bloomee",
+    "preview": "npm run preview --workspace=bloomee",
+    "prepare": "npm run prepare --workspace=bloomee",
+    "deploy": "npm run deploy --workspace=bloomee"
+  }
+}
