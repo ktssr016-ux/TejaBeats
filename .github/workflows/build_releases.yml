@@ -19,7 +19,7 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build windows --release
+      - run: flutter build windows --release --obfuscate --split-debug-info=build/app/outputs/symbols
       - uses: softprops/action-gh-release@v1
         with:
           files: build/windows/x64/runner/Release/*
@@ -39,7 +39,7 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build apk --release
+      - run: flutter build apk --release --obfuscate --split-debug-info=build/app/outputs/symbols
       - uses: softprops/action-gh-release@v1
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
