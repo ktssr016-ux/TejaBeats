@@ -753,7 +753,9 @@ class _PlaylistViewState extends State<PlaylistView> {
     );
 
     if (confirmed == true && mounted) {
+      if (!context.mounted) return;
       await _showAddToDownloadProgress(context, items, l10n);
+      if (!context.mounted) return;
       SnackbarService.showMessage(l10n.snackbarSongsAddedToQueue(items.length));
     }
   }

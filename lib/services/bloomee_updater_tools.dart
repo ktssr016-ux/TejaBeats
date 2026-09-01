@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:Bloomee/core/constants/setting_keys.dart';
-import 'package:Bloomee/services/db/db_provider.dart';
-import 'package:Bloomee/services/db/dao/settings_dao.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+
 
 bool isUpdateAvailable(
     String currentVer, String currentBuild, String newVer, String newBuild,
@@ -270,20 +268,16 @@ Future<String?> fetchChangelog(
 Future<Map<String, dynamic>> getLatestVersion() async => await getAppUpdates();
 
 String? extractUpUrl(Map<String, dynamic> data) {
-  // List<String> urls = [];
-
   for (var element in (data["assets"] as List)) {
-    // urls.add(element["browser_download_url"]);
-    if (element["browser_download_url"].toString().contains("windows")) {
+    final urlStr = element["browser_download_url"].toString().toLowerCase();
+    if (urlStr.contains("windows") || urlStr.endsWith(".zip")) {
       if (Platform.isWindows) {
         return element["browser_download_url"].toString();
       }
-    } else if (element["browser_download_url"].toString().contains("android")) {
+    } else if (urlStr.contains("android") || urlStr.endsWith(".apk")) {
       if (Platform.isAndroid) {
         return element["browser_download_url"].toString();
       }
-    } else {
-      continue;
     }
   }
   return null;

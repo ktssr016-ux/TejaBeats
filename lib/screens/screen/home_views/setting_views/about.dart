@@ -236,46 +236,6 @@ class About extends StatelessWidget {
   }
 }
 
-class _InfoPill extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final String? tooltip;
-  final VoidCallback? onTap;
-  const _InfoPill(
-      {required this.icon, required this.text, this.onTap, this.tooltip});
-  @override
-  Widget build(BuildContext context) {
-    final child = Row(
-      mainAxisSize: MainAxisSize.min, // Important for Wrap widget
-      children: [
-        Icon(icon, color: kSecondaryTextColor, size: 18),
-        const SizedBox(width: 8),
-        Text(text,
-            style: const TextStyle(
-                color: kSecondaryTextColor,
-                fontSize: 13,
-                fontFamily: 'Gilroy')),
-      ],
-    );
-
-    Widget result = InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-        child: child,
-      ),
-    );
-
-    if (tooltip != null && tooltip!.isNotEmpty) {
-      result = Tooltip(message: tooltip!, child: result);
-    }
-
-    if (onTap == null) return child;
-
-    return result;
-  }
-}
 
 class AnimatedWaveform extends StatefulWidget {
   const AnimatedWaveform({super.key});

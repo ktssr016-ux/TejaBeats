@@ -630,8 +630,6 @@ class _AestheticFilterChipsSliver extends StatelessWidget {
         return 'Albums';
       case ContentSearchFilter.playlist:
         return 'Playlists';
-      default:
-        return filter.name;
     }
   }
 
@@ -837,8 +835,9 @@ class _PluginsGlassyBoxSliver extends StatelessWidget {
                                             activePluginNotifier,
                                         onTap: () {
                                           final id = plugin.manifest.id;
-                                          if (activePluginNotifier.value == id)
+                                          if (activePluginNotifier.value == id) {
                                             return;
+                                          }
                                           activePluginNotifier.value = id;
                                           contentBloc.add(
                                               SetActiveContentPlugin(
@@ -847,7 +846,7 @@ class _PluginsGlassyBoxSliver extends StatelessWidget {
                                               .read<SettingsCubit>()
                                               .setSearchPluginId(id);
                                           if (textEditingController.text
-                                              .isNotEmpty) onPluginChanged();
+                                              .isNotEmpty) { onPluginChanged(); }
                                         },
                                       ),
                                     ))
@@ -1921,11 +1920,13 @@ class _NebulaBackground extends StatelessWidget {
 
   List<Color> _getReactiveGradientColors(ContentState state) {
     if (state.searchStatus != SearchStatus.loaded &&
-        state.searchStatus != SearchStatus.loadingMore)
+        state.searchStatus != SearchStatus.loadingMore) {
       return [Colors.transparent, Colors.transparent];
+    }
     final items = state.searchResults?.items;
-    if (items == null || items.isEmpty)
+    if (items == null || items.isEmpty) {
       return [Colors.transparent, Colors.transparent];
+    }
 
     String seedString = "";
     final firstItem = items.first;

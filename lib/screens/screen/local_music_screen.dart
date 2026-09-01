@@ -96,7 +96,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       if (shouldConfirm) {
         final result = await showDialog<_DeleteResult>(
           context: context,
-          builder: (context) => _DeleteConfirmDialog(
+          builder: (dialogCtx) => _DeleteConfirmDialog(
             trackTitle: track.title,
             linkedPlaylists: linkedPlaylists,
           ),
@@ -276,7 +276,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
           child: Row(
             children: [
               Text(
-                '${AppLocalizations.of(context)!.localMusicTrackCount(displayedTracks.length)}',
+                AppLocalizations.of(context)!.localMusicTrackCount(displayedTracks.length),
                 style: TextStyle(
                     color: Default_Theme.primaryColor2.withValues(alpha: 0.6),
                     fontSize: 13),

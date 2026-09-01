@@ -528,7 +528,8 @@ Future<void> _onRestoreTap(BuildContext context) async {
       // Always attempt to close the progress dialog using captured context
       if (progressDialogContext != null) {
         try {
-          if (Navigator.of(progressDialogContext!).canPop()) {
+          if (progressDialogContext!.mounted &&
+              Navigator.of(progressDialogContext!).canPop()) {
             Navigator.of(progressDialogContext!).pop();
           }
         } catch (e) {
@@ -537,7 +538,8 @@ Future<void> _onRestoreTap(BuildContext context) async {
       } else {
         // Fallback: try to pop root navigator (best-effort)
         try {
-          if (Navigator.of(context, rootNavigator: true).canPop()) {
+          if (context.mounted &&
+              Navigator.of(context, rootNavigator: true).canPop()) {
             Navigator.of(context, rootNavigator: true).pop();
           }
         } catch (_) {}
@@ -564,6 +566,7 @@ Future<void> _onRestoreTap(BuildContext context) async {
       }
     }
 
+    if (!context.mounted) return;
     await _showResultDialog(context, success: success, errors: errors);
   } catch (e, st) {
     log("Unexpected error in restore flow: $e\n$st", name: "StorageSetting");

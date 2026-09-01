@@ -610,7 +610,6 @@ class _DesktopTejaPlayerBar extends StatefulWidget {
   final String thumbUrl;
 
   const _DesktopTejaPlayerBar({
-    super.key,
     required this.state,
     required this.song,
     required this.thumbUrl,
@@ -621,9 +620,7 @@ class _DesktopTejaPlayerBar extends StatefulWidget {
 }
 
 class _DesktopTejaPlayerBarState extends State<_DesktopTejaPlayerBar> {
-  double _volume = 0.8;
   double _previousVolume = 0.8;
-  bool _isMuted = false;
 
   @override
   Widget build(BuildContext context) {

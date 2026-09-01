@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import logo from '$lib/assets/tejabeats_logo.png';
 	
 	export let data;
 
@@ -90,7 +91,7 @@
 <div class="launcher-container">
 	<div class="glow-bg" class:error-glow={error}></div>
 	<div class="content-box">
-		<h1 class="logo">TEJABEATS</h1>
+		<img src={logo} alt="TejaBeats" class="logo" />
 		
 		{#if loading}
 			<div class="spinner-container">
@@ -205,14 +206,17 @@
 	}
 
 	.logo {
-		font-size: 3.5rem;
-		font-weight: 900;
-		letter-spacing: -1.5px;
-		margin: 0 0 2.5rem 0;
-		background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		text-shadow: 0 0 45px rgba(236, 72, 153, 0.25);
+		width: 160px;
+		height: 160px;
+		object-fit: contain;
+		margin: 0 0 2rem 0;
+		filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.45));
+		animation: logoFloat 4s ease-in-out infinite alternate;
+	}
+
+	@keyframes logoFloat {
+		0% { transform: translateY(0px); filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.4)); }
+		100% { transform: translateY(-8px); filter: drop-shadow(0 0 45px rgba(236, 72, 153, 0.65)); }
 	}
 
 	.spinner-container {

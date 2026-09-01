@@ -343,9 +343,8 @@ class _SliverPlaylistItemsState extends State<SliverPlaylistItems> {
 				itemCount: _tracks.length,
 				itemExtent: 78,
 				proxyDecorator: _proxyDecorator,
-				onReorder: (oldIndex, newIndex) {
+				onReorderItem: (oldIndex, newIndex) {
 					setState(() {
-						if (oldIndex < newIndex) newIndex -= 1;
 						final Track item = _tracks.removeAt(oldIndex);
 						_tracks.insert(newIndex, item);
 					});
@@ -356,7 +355,7 @@ class _SliverPlaylistItemsState extends State<SliverPlaylistItems> {
 					return KeyedSubtree(
 						key: ValueKey(track.id),
 						child: Dismissible(
-							key: ValueKey(track.id + '_dismiss'),
+							key: ValueKey('${track.id}_dismiss'),
 							direction: DismissDirection.endToStart,
 							background: Container(
 								alignment: Alignment.centerRight,

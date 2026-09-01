@@ -15,21 +15,17 @@ import 'package:Bloomee/plugins/blocs/plugin/plugin_bloc.dart';
 import 'package:Bloomee/plugins/blocs/plugin/plugin_state.dart';
 import 'package:Bloomee/screens/screen/home_views/recents_view.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_views/about.dart';
-import 'package:Bloomee/screens/widgets/more_bottom_sheet.dart';
 import 'package:Bloomee/screens/widgets/sign_board_widget.dart';
-import 'package:Bloomee/screens/widgets/song_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:Bloomee/screens/screen/home_views/notification_view.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_view.dart';
 import 'package:Bloomee/screens/screen/home_views/timer_view.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
-import 'package:Bloomee/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'chart/carousal_widget.dart';
 import '../widgets/horizontal_card_view.dart';
-import 'package:badges/badges.dart' as badges;
 import 'package:Bloomee/utils/load_image.dart';
 
 class ExploreScreen extends StatefulWidget {

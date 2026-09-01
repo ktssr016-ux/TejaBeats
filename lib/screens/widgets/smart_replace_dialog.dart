@@ -176,6 +176,7 @@ class _SmartReplaceDialogState extends State<_SmartReplaceDialog> {
       // If the currently open playlist was affected, update it in-place so
       // the playlist screen reflects the change without requiring a reload.
       try {
+        if (!context.mounted) return;
         final playlistCubit = context.read<CurrentPlaylistCubit>();
         if (applyResult.updatedPlaylists
             .contains(playlistCubit.currentPlaylistName)) {
@@ -193,6 +194,7 @@ class _SmartReplaceDialogState extends State<_SmartReplaceDialog> {
           : l10n.smartReplaceAppliedPlaylistsSummary(
               playlistCount, queueSuffix);
       SnackbarService.showMessage(playlistMessage);
+      if (!context.mounted) return;
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {
