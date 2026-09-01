@@ -24,7 +24,7 @@ jobs:
       - name: Install Rust toolchain with Android targets
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android, i686-linux-android
+          targets: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -51,6 +51,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release_assets/*
+          tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -87,6 +88,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release_assets\TejaBeats-Windows.zip
+          tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
