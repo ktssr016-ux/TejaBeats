@@ -81,7 +81,10 @@ class _RepositoryDetailScreenState extends State<RepositoryDetailScreen> {
       }
 
       final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/${plugin.assetName}');
+      final assetName = plugin.assetName.toLowerCase().endsWith('.bex')
+          ? plugin.assetName
+          : '${plugin.assetName}.bex';
+      final file = File('${tempDir.path}/$assetName');
       await file.writeAsBytes(response.bodyBytes, flush: true);
 
       if (!context.mounted) return;
@@ -320,7 +323,7 @@ class _RepositoryDetailScreenState extends State<RepositoryDetailScreen> {
                         const SizedBox(width: 6),
                         Tooltip(
                             message: l10n.pluginRepositoryOutdatedManifest,
-                            child: Icon(Icons.warning_amber_rounded,
+                            child: const Icon(Icons.warning_amber_rounded,
                                 color: Colors.orange, size: 16)),
                       ]
                     ],

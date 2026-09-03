@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:Bloomee/core/di/service_locator.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/plugins/blocs/plugin/plugin_bloc.dart';
@@ -383,15 +385,64 @@ class _PluginManagerScreenState extends State<PluginManagerScreen> {
   Future<void> _installPlugin(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['bex'],
-        dialogTitle: l10n.pluginManagerSelectPackage,
-      );
+      FilePickerResult? result;
+      // On Android, MIME-type resolution for custom extension '.bex' causes many
+      // vendor file managers to grey out or hide .bex files.
+      // We use FileType.any on Android, and FileType.custom on desktop.
+      if (Platform.isAndroid) {
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.any,
+          dialogTitle: l10n.pluginManagerSelectPackage,
+          withData: true,
+        );
+      } else {
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['bex'],
+          dialogTitle: l10n.pluginManagerSelectPackage,
+          withData: true,
+        );
+      }
 
       if (result == null || result.files.isEmpty) return;
-      final filePath = result.files.single.path;
-      if (filePath == null) return;
+
+      final pickedFile = result.files.single;
+
+      // Validate that the selected file is a .bex file
+      if (!pickedFile.name.toLowerCase().endsWith('.bex')) {
+        SnackbarService.showMessage(
+            'Please select a valid .bex plugin package.');
+        return;
+      }
+
+      String? filePath = pickedFile.path;
+
+      // If filePath is null (Android SAF content URI) or does not end with .bex,
+      // cache the bytes to a temporary .bex file.
+      if (filePath == null ||
+          !filePath.toLowerCase().endsWith('.bex') ||
+          !File(filePath).existsSync()) {
+        final bytes = pickedFile.bytes ??
+            (pickedFile.path != null && File(pickedFile.path!).existsSync()
+                ? await File(pickedFile.path!).readAsBytes()
+                : null);
+
+        if (bytes != null && bytes.isNotEmpty) {
+          final tempDir = await getTemporaryDirectory();
+          final safeName = pickedFile.name.toLowerCase().endsWith('.bex')
+              ? pickedFile.name
+              : '${pickedFile.name}.bex';
+          final tempFile = File('${tempDir.path}/$safeName');
+          await tempFile.writeAsBytes(bytes, flush: true);
+          filePath = tempFile.path;
+        }
+      }
+
+      if (filePath == null || !File(filePath).existsSync()) {
+        SnackbarService.showMessage(
+            l10n.pluginManagerPickFailed('Could not access selected file.'));
+        return;
+      }
 
       if (context.mounted) {
         context

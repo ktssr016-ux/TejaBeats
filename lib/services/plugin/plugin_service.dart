@@ -431,46 +431,67 @@ class _PackedPluginManifest {
 }
 
 Future<_PackedPluginManifest> _readPackedManifest(String packedFilePath) async {
-  final bytes = await File(packedFilePath).readAsBytes();
-  final archive = ZipDecoder().decodeBytes(bytes, verify: false);
-  final manifestFile = archive.files.cast<ArchiveFile?>().firstWhere(
-        (file) =>
-            file != null &&
-            file.isFile &&
-            p.basename(file.name).toLowerCase() == 'manifest.json',
-        orElse: () => null,
-      );
+  // First try the native Rust unpacker which supports standard tar.zst .bex packages.
+  try {
+    final tempDir = (await getTemporaryDirectory()).path;
+    final manifest = await bridge.inspectPackedPlugin(
+      packedFilePath: packedFilePath,
+      tempDir: tempDir,
+    );
+    final countryAllowlist = manifest.countryAllowlist
+        .map((value) => CountryInfoService.normalizeCountryCode(value))
+        .where((value) => value.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return _PackedPluginManifest(
+      pluginId: manifest.id,
+      countryAllowlist: countryAllowlist,
+    );
+  } catch (e) {
+    log('Rust inspectPackedPlugin failed: $e. Trying zip fallback...',
+        name: 'PluginService');
+    // Fallback: attempt ZipDecoder in case an alternative/legacy zip package is passed.
+    try {
+      final bytes = await File(packedFilePath).readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes, verify: false);
+      final manifestFile = archive.files.cast<ArchiveFile?>().firstWhere(
+            (file) =>
+                file != null &&
+                file.isFile &&
+                p.basename(file.name).toLowerCase() == 'manifest.json',
+            orElse: () => null,
+          );
 
-  if (manifestFile == null) {
+      if (manifestFile != null) {
+        final manifestBytes = manifestFile.content as List<int>;
+        if (manifestBytes.isNotEmpty) {
+          final decoded = jsonDecode(utf8.decode(manifestBytes));
+          if (decoded is Map) {
+            final json = Map<String, dynamic>.from(decoded);
+            final pluginId = json['id']?.toString() ?? 'unknown';
+            final countryAllowlist =
+                (json['country_allowlist'] as List<dynamic>? ?? const [])
+                    .map((value) =>
+                        CountryInfoService.normalizeCountryCode(value?.toString()))
+                    .where((value) => value.isNotEmpty)
+                    .toSet()
+                    .toList()
+                  ..sort();
+
+            return _PackedPluginManifest(
+              pluginId: pluginId,
+              countryAllowlist: countryAllowlist,
+            );
+          }
+        }
+      }
+    } catch (_) {}
+
+    // Graceful fallback rather than throwing ArchiveException prematurely.
     return const _PackedPluginManifest(
-        pluginId: 'unknown', countryAllowlist: []);
+      pluginId: 'unknown',
+      countryAllowlist: [],
+    );
   }
-
-  final manifestBytes = manifestFile.content as List<int>;
-  if (manifestBytes.isEmpty) {
-    return const _PackedPluginManifest(
-        pluginId: 'unknown', countryAllowlist: []);
-  }
-
-  final decoded = jsonDecode(utf8.decode(manifestBytes));
-  if (decoded is! Map) {
-    return const _PackedPluginManifest(
-        pluginId: 'unknown', countryAllowlist: []);
-  }
-
-  final json = Map<String, dynamic>.from(decoded);
-  final pluginId = json['id']?.toString() ?? 'unknown';
-  final countryAllowlist = (json['country_allowlist'] as List<dynamic>? ??
-          const [])
-      .map(
-          (value) => CountryInfoService.normalizeCountryCode(value?.toString()))
-      .where((value) => value.isNotEmpty)
-      .toSet()
-      .toList()
-    ..sort();
-
-  return _PackedPluginManifest(
-    pluginId: pluginId,
-    countryAllowlist: countryAllowlist,
-  );
 }
