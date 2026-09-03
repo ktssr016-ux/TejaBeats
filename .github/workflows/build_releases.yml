@@ -112,17 +112,15 @@ jobs:
       - name: Install Rust toolchain with iOS targets
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-ios
+          targets: aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Install dependencies and CocoaPods
-        run: |
-          flutter pub get
-          cd ios && pod install --repo-update && cd ..
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build iOS App (.ipa)
         run: |
