@@ -1,28 +1,55 @@
+#define MyAppName "TejaBeats"
+#define MyAppVersion "3.0.4"
+#define MyAppPublisher "Teja"
+#define MyAppURL "https://github.com/ktssr016-ux/TejaBeats"
+#define MyAppExeName "TejaBeats.exe"
+#define MyAppSourceDir "build\windows\x64\runner\Release"
+
 [Setup]
+; AppId uniquely identifies this application. Do not change it for updates.
 AppId={{D1E5F8A2-304B-4E02-8901-20268E7A0001}}
-AppName=TejaBeats
-AppVersion=3.0.4
-AppPublisher=TejaBeats
-DefaultDirName={autopf}\TejaBeats
-DefaultGroupName=TejaBeats
-UninstallDisplayIcon={app}\TejaBeats.exe
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppVerName={#MyAppName} {#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\{#MyAppName}
+DefaultGroupName={#MyAppName}
+AllowNoIcons=yes
+LicenseFile=LICENSE
+OutputDir=dist
+OutputBaseFilename=TejaBeats-Setup
+SetupIconFile=windows\runner\resources\app_icon.ico
+UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayName={#MyAppName}
 Compression=lzma2/ultra64
 SolidCompression=yes
-OutputDir=c:\tejamusic\BloomeeTunes-3.0.4-202\BloomeeTunes-3.0.4-202
-OutputBaseFilename=TejaBeats-Windows
-ArchitecturesInstallIn64BitMode=x64compatible
 WizardStyle=modern
-LicenseFile=LICENSE
+ArchitecturesInstallIn64BitMode=x64compatible
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=dialog commandline
+CloseApplications=yes
+RestartApplications=no
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Files]
-Source: "c:\tejamusic\BloomeeTunes-3.0.4-202\BloomeeTunes-3.0.4-202\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyAppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\TejaBeats"; Filename: "{app}\TejaBeats.exe"
-Name: "{autodesktop}\TejaBeats"; Filename: "{app}\TejaBeats.exe"; Tasks: desktopicon
+; Start Menu Programs Shortcut (Windows 10/11 Start Menu)
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#MyAppExeName}"
+; Start Menu Group Shortcuts
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#MyAppExeName}"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+; Desktop Shortcut
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; WorkingDir: "{app}"; IconFilename: "{app}\{#MyAppExeName}"
 
 [Run]
-Filename: "{app}\TejaBeats.exe"; Description: "{cm:LaunchProgram,TejaBeats}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent; WorkingDir: "{app}"

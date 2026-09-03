@@ -24,6 +24,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
   static const _fieldColor = Color(0xFF1C1624);
 
   final SettingsDAO _settingsDao = SettingsDAO(DBProvider.db);
+  final TextEditingController _nameController = TextEditingController(text: 'Teja');
 
   String _selectedLang = '';
   String _selectedCountry = CountryInfoService.defaultCountryCode;
@@ -41,6 +42,8 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
   Future<void> _loadInitial() async {
     final lang =
         await _settingsDao.getSettingStr(SettingKeys.languageCode) ?? '';
+    final storedName =
+        await _settingsDao.getSettingStr(SettingKeys.userName) ?? 'Teja';
     final auto =
         await _settingsDao.getSettingBool(SettingKeys.autoGetCountry) ?? false;
 
@@ -60,6 +63,7 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
         lang.isEmpty || supportedCodes.contains(lang) ? lang : '';
 
     if (!mounted) return;
+    _nameController.text = storedName;
     setState(() {
       _selectedLang = normalizedLang;
       _selectedCountry = country;
@@ -135,6 +139,11 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
   }
 
   Future<void> _finish() async {
+    final name = _nameController.text.trim();
+    await _settingsDao.putSettingStr(
+      SettingKeys.userName,
+      name.isNotEmpty ? name : 'Teja',
+    );
     await _settingsDao.putSettingBool(
       SettingKeys.autoGetCountry,
       _autoDetectCountry,
@@ -281,7 +290,42 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 24),
+                          const _FieldLabel(label: 'Your Name'),
+                          const SizedBox(height: 10),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: _fieldColor,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Default_Theme.primaryColor1.withValues(alpha: 0.12),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            child: TextField(
+                              controller: _nameController,
+                              maxLength: 30,
+                              style: const TextStyle(
+                                color: Default_Theme.primaryColor1,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ).merge(Default_Theme.secondoryTextStyle),
+                              decoration: InputDecoration(
+                                hintText: 'Enter your name',
+                                counterText: '',
+                                hintStyle: TextStyle(
+                                  color: Default_Theme.primaryColor1.withValues(alpha: 0.4),
+                                ),
+                                border: InputBorder.none,
+                                prefixIcon: Icon(
+                                  MingCute.user_3_fill,
+                                  color: Default_Theme.accentColor2,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                           _FieldLabel(label: l10n.countrySettingLanguageLabel),
                           const SizedBox(height: 10),
                           _DropdownField(

@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:Bloomee/screens/screen/home_views/setting_views/license_view.dart';
 
 /// Service responsible for managing open-source software license registration
 /// and presentation within TejaBeats.
 class LicenseService {
   static bool _registered = false;
 
-  /// Registers custom licenses (TejaBeats, Bloomee, Cargokit, Fonts) into
+  /// Registers custom licenses (TejaBeats, Cargokit, Fonts) into
   /// Flutter's native [LicenseRegistry] so they appear in [showLicensePage].
   static void registerCustomLicenses() {
     if (_registered) return;
@@ -15,11 +16,10 @@ class LicenseService {
     LicenseRegistry.addLicense(() async* {
       // Core Application License
       yield const LicenseEntryWithLineBreaks(
-        ['TejaBeats (Derivative Work)'],
+        ['TejaBeats'],
         '''GNU General Public License Version 2.0 (GPL-2.0)
 
-Copyright (C) 2026 Teja. All modifications.
-Based on Bloomee: Copyright (C) 2024-2026 Hemant Kumar & Bloomee Contributors.
+Copyright (C) 2026 Teja. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,18 +34,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.''',
-      );
-
-      // Base Project Notice
-      yield const LicenseEntryWithLineBreaks(
-        ['Bloomee (Base Project)'],
-        '''Original Base Project: Bloomee / BloomeeTunes
-Author: Hemant Kumar (@iamhemantindia) and Bloomee Contributors
-Upstream: https://github.com/HemantKarya/BloomeeTunes
-License: GNU General Public License v2.0 (GPL-2.0)
-Copyright (C) 2024-2026 Hemant Kumar & Bloomee Contributors
-
-All original Bloomee copyright and license notices are retained intact.''',
       );
 
       // Cargokit Build Tool
@@ -129,29 +117,12 @@ or proprietary service APIs.''',
     });
   }
 
-  /// Displays the full open-source license viewer.
+  /// Displays the custom TejaBeats open-source license viewer.
   static void openLicenses(BuildContext context) {
-    registerCustomLicenses();
-    showLicensePage(
-      context: context,
-      applicationName: 'TejaBeats',
-      applicationVersion: '3.0.4',
-      applicationLegalese:
-          'Licensed under GNU General Public License v2.0 (GPL-2.0).\n'
-          'Based on Bloomee by Hemant Kumar & Contributors.\n'
-          'TejaBeats modifications Copyright © 2026 Teja.',
-      applicationIcon: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Image.asset(
-          'assets/icons/tejabeats_logo.png',
-          width: 56,
-          height: 56,
-          errorBuilder: (_, __, ___) => const Icon(
-            Icons.music_note_rounded,
-            size: 48,
-            color: Color(0xFFFF2D78),
-          ),
-        ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TejaBeatsLicenseView(),
       ),
     );
   }

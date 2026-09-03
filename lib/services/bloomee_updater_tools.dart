@@ -268,9 +268,10 @@ Future<String?> fetchChangelog(
 Future<Map<String, dynamic>> getLatestVersion() async => await getAppUpdates();
 
 String? extractUpUrl(Map<String, dynamic> data) {
+  if (data["assets"] == null || data["assets"] is! List) return null;
   for (var element in (data["assets"] as List)) {
     final urlStr = element["browser_download_url"].toString().toLowerCase();
-    if (urlStr.contains("windows") || urlStr.endsWith(".zip")) {
+    if (urlStr.contains("windows") || urlStr.endsWith(".zip") || urlStr.endsWith(".exe")) {
       if (Platform.isWindows) {
         return element["browser_download_url"].toString();
       }

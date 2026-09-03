@@ -241,26 +241,34 @@ class LyricsDB {
 class SearchHistoryDB {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: true)
+  @Index(unique: true, replace: true, composite: [CompositeIndex('userTag')])
   String query;
 
   @Index()
   DateTime lastSearched;
 
+  /// Tag to isolate search history per user/profile.
+  /// Defaults to 'default' for single-user installs.
+  @Index()
+  String userTag;
+
   SearchHistoryDB({
     required this.query,
     required this.lastSearched,
+    this.userTag = 'default',
   });
 
   Map<String, dynamic> toMap() => {
         'query': query,
         'lastSearched': lastSearched.millisecondsSinceEpoch,
+        'userTag': userTag,
       };
 
   factory SearchHistoryDB.fromMap(Map<String, dynamic> map) => SearchHistoryDB(
         query: (map['query'] as String?) ?? '',
         lastSearched:
             DateTime.fromMillisecondsSinceEpoch(map['lastSearched'] as int),
+        userTag: (map['userTag'] as String?) ?? 'default',
       );
 
   String toJson() => json.encode(toMap());

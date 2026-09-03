@@ -8729,6 +8729,11 @@ const SearchHistoryDBSchema = CollectionSchema(
       id: 1,
       name: r'query',
       type: IsarType.string,
+    ),
+    r'userTag': PropertySchema(
+      id: 2,
+      name: r'userTag',
+      type: IsarType.string,
     )
   },
   estimateSize: _searchHistoryDBEstimateSize,
@@ -8737,14 +8742,19 @@ const SearchHistoryDBSchema = CollectionSchema(
   deserializeProp: _searchHistoryDBDeserializeProp,
   idName: r'id',
   indexes: {
-    r'query': IndexSchema(
-      id: -3238105102146786367,
-      name: r'query',
+    r'query_userTag': IndexSchema(
+      id: 5376966897184085036,
+      name: r'query_userTag',
       unique: true,
       replace: true,
       properties: [
         IndexPropertySchema(
           name: r'query',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'userTag',
           type: IndexType.hash,
           caseSensitive: true,
         )
@@ -8760,6 +8770,19 @@ const SearchHistoryDBSchema = CollectionSchema(
           name: r'lastSearched',
           type: IndexType.value,
           caseSensitive: false,
+        )
+      ],
+    ),
+    r'userTag': IndexSchema(
+      id: -7588703593008114334,
+      name: r'userTag',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'userTag',
+          type: IndexType.hash,
+          caseSensitive: true,
         )
       ],
     )
@@ -8779,6 +8802,7 @@ int _searchHistoryDBEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.query.length * 3;
+  bytesCount += 3 + object.userTag.length * 3;
   return bytesCount;
 }
 
@@ -8790,6 +8814,7 @@ void _searchHistoryDBSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.lastSearched);
   writer.writeString(offsets[1], object.query);
+  writer.writeString(offsets[2], object.userTag);
 }
 
 SearchHistoryDB _searchHistoryDBDeserialize(
@@ -8801,6 +8826,7 @@ SearchHistoryDB _searchHistoryDBDeserialize(
   final object = SearchHistoryDB(
     lastSearched: reader.readDateTime(offsets[0]),
     query: reader.readString(offsets[1]),
+    userTag: reader.readStringOrNull(offsets[2]) ?? 'default',
   );
   object.id = id;
   return object;
@@ -8817,6 +8843,8 @@ P _searchHistoryDBDeserializeProp<P>(
       return (reader.readDateTime(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
+    case 2:
+      return (reader.readStringOrNull(offset) ?? 'default') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -8836,57 +8864,89 @@ void _searchHistoryDBAttach(
 }
 
 extension SearchHistoryDBByIndex on IsarCollection<SearchHistoryDB> {
-  Future<SearchHistoryDB?> getByQuery(String query) {
-    return getByIndex(r'query', [query]);
+  Future<SearchHistoryDB?> getByQueryUserTag(String query, String userTag) {
+    return getByIndex(r'query_userTag', [query, userTag]);
   }
 
-  SearchHistoryDB? getByQuerySync(String query) {
-    return getByIndexSync(r'query', [query]);
+  SearchHistoryDB? getByQueryUserTagSync(String query, String userTag) {
+    return getByIndexSync(r'query_userTag', [query, userTag]);
   }
 
-  Future<bool> deleteByQuery(String query) {
-    return deleteByIndex(r'query', [query]);
+  Future<bool> deleteByQueryUserTag(String query, String userTag) {
+    return deleteByIndex(r'query_userTag', [query, userTag]);
   }
 
-  bool deleteByQuerySync(String query) {
-    return deleteByIndexSync(r'query', [query]);
+  bool deleteByQueryUserTagSync(String query, String userTag) {
+    return deleteByIndexSync(r'query_userTag', [query, userTag]);
   }
 
-  Future<List<SearchHistoryDB?>> getAllByQuery(List<String> queryValues) {
-    final values = queryValues.map((e) => [e]).toList();
-    return getAllByIndex(r'query', values);
+  Future<List<SearchHistoryDB?>> getAllByQueryUserTag(
+      List<String> queryValues, List<String> userTagValues) {
+    final len = queryValues.length;
+    assert(userTagValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([queryValues[i], userTagValues[i]]);
+    }
+
+    return getAllByIndex(r'query_userTag', values);
   }
 
-  List<SearchHistoryDB?> getAllByQuerySync(List<String> queryValues) {
-    final values = queryValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'query', values);
+  List<SearchHistoryDB?> getAllByQueryUserTagSync(
+      List<String> queryValues, List<String> userTagValues) {
+    final len = queryValues.length;
+    assert(userTagValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([queryValues[i], userTagValues[i]]);
+    }
+
+    return getAllByIndexSync(r'query_userTag', values);
   }
 
-  Future<int> deleteAllByQuery(List<String> queryValues) {
-    final values = queryValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'query', values);
+  Future<int> deleteAllByQueryUserTag(
+      List<String> queryValues, List<String> userTagValues) {
+    final len = queryValues.length;
+    assert(userTagValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([queryValues[i], userTagValues[i]]);
+    }
+
+    return deleteAllByIndex(r'query_userTag', values);
   }
 
-  int deleteAllByQuerySync(List<String> queryValues) {
-    final values = queryValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'query', values);
+  int deleteAllByQueryUserTagSync(
+      List<String> queryValues, List<String> userTagValues) {
+    final len = queryValues.length;
+    assert(userTagValues.length == len,
+        'All index values must have the same length');
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([queryValues[i], userTagValues[i]]);
+    }
+
+    return deleteAllByIndexSync(r'query_userTag', values);
   }
 
-  Future<Id> putByQuery(SearchHistoryDB object) {
-    return putByIndex(r'query', object);
+  Future<Id> putByQueryUserTag(SearchHistoryDB object) {
+    return putByIndex(r'query_userTag', object);
   }
 
-  Id putByQuerySync(SearchHistoryDB object, {bool saveLinks = true}) {
-    return putByIndexSync(r'query', object, saveLinks: saveLinks);
+  Id putByQueryUserTagSync(SearchHistoryDB object, {bool saveLinks = true}) {
+    return putByIndexSync(r'query_userTag', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByQuery(List<SearchHistoryDB> objects) {
-    return putAllByIndex(r'query', objects);
+  Future<List<Id>> putAllByQueryUserTag(List<SearchHistoryDB> objects) {
+    return putAllByIndex(r'query_userTag', objects);
   }
 
-  List<Id> putAllByQuerySync(List<SearchHistoryDB> objects,
+  List<Id> putAllByQueryUserTagSync(List<SearchHistoryDB> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'query', objects, saveLinks: saveLinks);
+    return putAllByIndexSync(r'query_userTag', objects, saveLinks: saveLinks);
   }
 }
 
@@ -8979,28 +9039,28 @@ extension SearchHistoryDBQueryWhere
   }
 
   QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterWhereClause>
-      queryEqualTo(String query) {
+      queryEqualToAnyUserTag(String query) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'query',
+        indexName: r'query_userTag',
         value: [query],
       ));
     });
   }
 
   QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterWhereClause>
-      queryNotEqualTo(String query) {
+      queryNotEqualToAnyUserTag(String query) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'query',
+              indexName: r'query_userTag',
               lower: [],
               upper: [query],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'query',
+              indexName: r'query_userTag',
               lower: [query],
               includeLower: false,
               upper: [],
@@ -9008,15 +9068,60 @@ extension SearchHistoryDBQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'query',
+              indexName: r'query_userTag',
               lower: [query],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'query',
+              indexName: r'query_userTag',
               lower: [],
               upper: [query],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterWhereClause>
+      queryUserTagEqualTo(String query, String userTag) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'query_userTag',
+        value: [query, userTag],
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterWhereClause>
+      queryEqualToUserTagNotEqualTo(String query, String userTag) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'query_userTag',
+              lower: [query],
+              upper: [query, userTag],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'query_userTag',
+              lower: [query, userTag],
+              includeLower: false,
+              upper: [query],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'query_userTag',
+              lower: [query, userTag],
+              includeLower: false,
+              upper: [query],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'query_userTag',
+              lower: [query],
+              upper: [query, userTag],
               includeUpper: false,
             ));
       }
@@ -9113,6 +9218,51 @@ extension SearchHistoryDBQueryWhere
         upper: [upperLastSearched],
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterWhereClause>
+      userTagEqualTo(String userTag) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'userTag',
+        value: [userTag],
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterWhereClause>
+      userTagNotEqualTo(String userTag) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'userTag',
+              lower: [],
+              upper: [userTag],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'userTag',
+              lower: [userTag],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'userTag',
+              lower: [userTag],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'userTag',
+              lower: [],
+              upper: [userTag],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -9366,6 +9516,142 @@ extension SearchHistoryDBQueryFilter
       ));
     });
   }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userTag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'userTag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'userTag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'userTag',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'userTag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'userTag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'userTag',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'userTag',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userTag',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterFilterCondition>
+      userTagIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'userTag',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension SearchHistoryDBQueryObject
@@ -9400,6 +9686,19 @@ extension SearchHistoryDBQuerySortBy
       sortByQueryDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'query', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterSortBy> sortByUserTag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userTag', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterSortBy>
+      sortByUserTagDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userTag', Sort.desc);
     });
   }
 }
@@ -9444,6 +9743,19 @@ extension SearchHistoryDBQuerySortThenBy
       return query.addSortBy(r'query', Sort.desc);
     });
   }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterSortBy> thenByUserTag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userTag', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QAfterSortBy>
+      thenByUserTagDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userTag', Sort.desc);
+    });
+  }
 }
 
 extension SearchHistoryDBQueryWhereDistinct
@@ -9459,6 +9771,13 @@ extension SearchHistoryDBQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'query', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, SearchHistoryDB, QDistinct> distinctByUserTag(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'userTag', caseSensitive: caseSensitive);
     });
   }
 }
@@ -9481,6 +9800,12 @@ extension SearchHistoryDBQueryProperty
   QueryBuilder<SearchHistoryDB, String, QQueryOperations> queryProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'query');
+    });
+  }
+
+  QueryBuilder<SearchHistoryDB, String, QQueryOperations> userTagProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'userTag');
     });
   }
 }

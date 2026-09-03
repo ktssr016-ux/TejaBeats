@@ -10,6 +10,10 @@ class SettingKeys {
   static const String autoUpdateNotify = "auto_update_notify";
   static const String autoSlideCharts = "auto_slide_charts";
 
+  // ── User profile ───────────────────────────────────────────────────────────
+  /// User's display name shown in the home screen greeting.
+  static const String userName = "userName";
+
   // ── Playback ────────────────────────────────────────────────────────────────
   static const String strmQuality = "streamQuality";
   static const String autoPlay = "autoPlaySimilarItems";

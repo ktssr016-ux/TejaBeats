@@ -126,6 +126,78 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
+  void _showNameEditDialog(BuildContext context, String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF14101A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Your Name',
+          style: TextStyle(
+            color: Default_Theme.primaryColor1,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 30,
+          style: const TextStyle(color: Default_Theme.primaryColor1),
+          decoration: InputDecoration(
+            hintText: 'Enter your name',
+            hintStyle: TextStyle(
+              color: Default_Theme.primaryColor1.withValues(alpha: 0.4),
+            ),
+            filled: true,
+            fillColor: const Color(0xFF1C1624),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            counterStyle: TextStyle(
+              color: Default_Theme.primaryColor1.withValues(alpha: 0.5),
+            ),
+          ),
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty) {
+              context.read<SettingsCubit>().setUserName(value);
+            }
+            Navigator.of(dialogContext).pop();
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Default_Theme.primaryColor1.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isNotEmpty) {
+                context.read<SettingsCubit>().setUserName(value);
+              }
+              Navigator.of(dialogContext).pop();
+            },
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: Default_Theme.accentColor2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -193,25 +265,51 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${_getGreeting()}, Teja 👋',
-                                style: AppTheme.headingMedium.copyWith(
-                                  fontFamily: 'Unageo',
-                                  fontWeight: FontWeight.w700,
+                          GestureDetector(
+                            onTap: () {
+                              final currentName = context.read<SettingsCubit>().state.userName;
+                              _showNameEditDialog(context, currentName.isNotEmpty ? currentName : 'Teja');
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    BlocBuilder<SettingsCubit, SettingsState>(
+                                      buildWhen: (prev, curr) => prev.userName != curr.userName,
+                                      builder: (context, settingsState) {
+                                        final name = settingsState.userName.isNotEmpty
+                                            ? settingsState.userName
+                                            : 'Teja';
+                                        return Text(
+                                          '${_getGreeting()}, $name 👋',
+                                          style: AppTheme.headingMedium.copyWith(
+                                            fontFamily: 'Unageo',
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      MingCute.edit_2_line,
+                                      size: 16,
+                                      color: AppTheme.textSecondary.withValues(alpha: 0.6),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'YOUR MUSIC. YOUR BEATS.',
-                                style: AppTheme.labelSmall.copyWith(
-                                  color: AppTheme.accentPink,
-                                  letterSpacing: 1.1,
+                                const SizedBox(height: 2),
+                                Text(
+                                  'YOUR MUSIC. YOUR BEATS.',
+                                  style: AppTheme.labelSmall.copyWith(
+                                    color: AppTheme.accentPink,
+                                    letterSpacing: 1.1,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           Row(
                             children: [

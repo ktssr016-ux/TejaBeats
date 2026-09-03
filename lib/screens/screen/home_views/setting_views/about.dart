@@ -179,7 +179,7 @@ class About extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               const Text(
-                'Based on open-source Bloomee\nLicensed under GNU GPL v2.0',
+                'TejaBeats Music Player\nLicensed under GNU GPL v2.0',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: kSecondaryTextColor,
@@ -240,7 +240,7 @@ class About extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 launchUrl(
-                    Uri.parse("https://hemantkarya.github.io/BloomeeTunes/"),
+                    Uri.parse("https://github.com/ktssr016-ux/TejaBeats"),
                     mode: LaunchMode.externalApplication);
               },
               child: Row(

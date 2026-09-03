@@ -12,6 +12,8 @@ import 'package:Bloomee/screens/screen/home_views/setting_views/player_setting.d
 import 'package:Bloomee/screens/screen/home_views/setting_views/updates_setting.dart';
 import 'package:Bloomee/screens/screen/plugin_manager_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:Bloomee/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/l10n/app_localizations.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -46,6 +48,26 @@ class SettingsView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
+              // ── Group 0: User Profile ──
+              _SettingsSection(
+                children: [
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    buildWhen: (prev, curr) => prev.userName != curr.userName,
+                    builder: (context, state) {
+                      return _SettingsTile(
+                        title: 'Your Name',
+                        subtitle: state.userName.isNotEmpty
+                            ? state.userName
+                            : 'Tap to set your name',
+                        icon: MingCute.user_3_fill,
+                        iconColor: Default_Theme.accentColor2,
+                        onTap: () => _showNameDialog(context, state.userName),
+                      );
+                    },
+                  ),
+                ],
+              ),
+
               // ── Group 1: Core App & Plugins ──
               _SettingsSection(
                 children: [
@@ -110,7 +132,7 @@ class SettingsView extends StatelessWidget {
                 ],
               ),
 
-              // ── Group 3: Preferences & Integrations ──
+              // ── Group 3: Preferences & Storage ──
               _SettingsSection(
                 children: [
                   _SettingsTile(
@@ -137,14 +159,6 @@ class SettingsView extends StatelessWidget {
                     icon: MingCute.coin_2_fill,
                     iconColor: Default_Theme.accentColor2,
                     onTap: () => _navigate(context, const BackupSettings()),
-                  ),
-                  _SettingsTile(
-                    title: AppLocalizations.of(context)!.settingsLastFM,
-                    subtitle:
-                        AppLocalizations.of(context)!.settingsLastFMSubtitle,
-                    icon: FontAwesome.lastfm_brand,
-                    iconColor: Default_Theme.accentColor2,
-                    onTap: () => _navigate(context, const LastDotFM()),
                   ),
                 ],
               ),
@@ -182,6 +196,78 @@ class SettingsView extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => screen),
+    );
+  }
+
+  void _showNameDialog(BuildContext context, String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF14101A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Your Name',
+          style: TextStyle(
+            color: Default_Theme.primaryColor1,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 30,
+          style: const TextStyle(color: Default_Theme.primaryColor1),
+          decoration: InputDecoration(
+            hintText: 'Enter your name',
+            hintStyle: TextStyle(
+              color: Default_Theme.primaryColor1.withValues(alpha: 0.4),
+            ),
+            filled: true,
+            fillColor: const Color(0xFF1C1624),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            counterStyle: TextStyle(
+              color: Default_Theme.primaryColor1.withValues(alpha: 0.5),
+            ),
+          ),
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty) {
+              context.read<SettingsCubit>().setUserName(value);
+            }
+            Navigator.of(dialogContext).pop();
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Default_Theme.primaryColor1.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isNotEmpty) {
+                context.read<SettingsCubit>().setUserName(value);
+              }
+              Navigator.of(dialogContext).pop();
+            },
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: Default_Theme.accentColor2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

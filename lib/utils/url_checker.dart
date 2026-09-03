@@ -48,13 +48,23 @@ UrlType getUrlType(String url) {
     }
 
     // Spotify
-    if (host == 'open.spotify.com' && uri.pathSegments.length >= 2) {
-      return switch (uri.pathSegments[0]) {
-        'track' => UrlType.spotifyTrack,
-        'playlist' => UrlType.spotifyPlaylist,
-        'album' => UrlType.spotifyAlbum,
-        _ => UrlType.other,
-      };
+    if (host.contains('spotify.com') || host == 'spoti.fi' || host == 'spotify.link') {
+      final segments = uri.pathSegments;
+      if (segments.isNotEmpty) {
+        // Handle international prefixes e.g. /intl-ja/playlist/...
+        final typeSegment = segments.firstWhere(
+          (s) => s == 'track' || s == 'playlist' || s == 'album',
+          orElse: () => '',
+        );
+        return switch (typeSegment) {
+          'track' => UrlType.spotifyTrack,
+          'playlist' => UrlType.spotifyPlaylist,
+          'album' => UrlType.spotifyAlbum,
+          _ => host == 'spotify.link' || host == 'spoti.fi'
+              ? UrlType.spotifyPlaylist
+              : UrlType.other,
+        };
+      }
     }
   } catch (_) {}
   return UrlType.other;

@@ -21,7 +21,7 @@ class AppRouter {
   static final globalRouterKey = GlobalKey<NavigatorState>();
 
   static final globalRouter = GoRouter(
-    initialLocation: '/Search',
+    initialLocation: '/Explore',
     navigatorKey: globalRouterKey,
     routes: [
       GoRoute(

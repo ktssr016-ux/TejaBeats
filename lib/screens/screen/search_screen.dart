@@ -1437,13 +1437,6 @@ class _TejaBeatsDiscoverySliver extends StatefulWidget {
 
 class _TejaBeatsDiscoverySliverState extends State<_TejaBeatsDiscoverySliver> {
   final ScrollController _trendingScrollController = ScrollController();
-  final List<String> _recentSearches = [
-    'paradise new song',
-    'Beat It michael jackson thriller',
-    'irumudi',
-    'Chill Vibes',
-    'hi',
-  ];
 
   final List<({String title, String subtitle, List<Color> colors, IconData icon})>
       _trendingItems = [
@@ -1486,6 +1479,13 @@ class _TejaBeatsDiscoverySliverState extends State<_TejaBeatsDiscoverySliver> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Load fresh search history from DB
+    context.read<SearchSuggestionBloc>().add(const SearchSuggestionFetch(''));
+  }
+
+  @override
   void dispose() {
     _trendingScrollController.dispose();
     super.dispose();
@@ -1507,68 +1507,87 @@ class _TejaBeatsDiscoverySliverState extends State<_TejaBeatsDiscoverySliver> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       sliver: SliverList(
         delegate: SliverChildListDelegate([
-          // Recent Searches Header
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              children: const [
-                Icon(MingCute.time_fill, color: Color(0xFFFF2D78), size: 18),
-                SizedBox(width: 10),
-                Text(
-                  'Recent Searches',
-                  style: TextStyle(
-                    fontFamily: 'Gilroy',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Real Recent Searches from Database
+          BlocBuilder<SearchSuggestionBloc, SearchSuggestionState>(
+            builder: (context, suggestionState) {
+              final recentList = suggestionState.dbSuggestionList;
+              if (recentList.isEmpty) {
+                return const SizedBox.shrink();
+              }
 
-          // Recent Searches Items
-          ..._recentSearches.map(
-            (query) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => widget.onSearch(query),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 4),
-                      const Icon(MingCute.time_line,
-                          color: Color(0xFFFF2D78), size: 18),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          query,
-                          style: TextStyle(
-                            fontFamily: 'Gilroy',
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white.withValues(alpha: 0.9),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(MingCute.time_fill, color: Color(0xFFFF2D78), size: 18),
+                            SizedBox(width: 10),
+                            Text(
+                              'Recent Searches',
+                              style: TextStyle(
+                                fontFamily: 'Gilroy',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  ...recentList.map((item) {
+                    final query = item['query'] ?? '';
+                    if (query.isEmpty) return const SizedBox.shrink();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () => widget.onSearch(query),
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 4),
+                              const Icon(MingCute.time_line,
+                                  color: Color(0xFFFF2D78), size: 18),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  query,
+                                  style: TextStyle(
+                                    fontFamily: 'Gilroy',
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(MingCute.close_line,
+                                    color: Colors.white.withValues(alpha: 0.4), size: 16),
+                                onPressed: () {
+                                  context
+                                      .read<SearchSuggestionBloc>()
+                                      .add(SearchSuggestionClear(query));
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(MingCute.close_line,
-                            color: Colors.white.withValues(alpha: 0.4), size: 16),
-                        onPressed: () {
-                          setState(() {
-                            _recentSearches.remove(query);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                    );
+                  }),
+                  const SizedBox(height: 20),
+                ],
+              );
+            },
           ),
-
-          const SizedBox(height: 28),
 
           // Trending Searches Header
           Padding(
