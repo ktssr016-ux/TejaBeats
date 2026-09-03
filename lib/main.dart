@@ -1,5 +1,11 @@
+// TejaBeats - High-performance desktop and mobile music player.
+// Modified from Bloomee: Copyright (C) 2024-2026 Hemant Kumar & Bloomee Contributors.
+// Modifications Copyright (C) 2026 Teja.
+// Licensed under the GNU General Public License Version 2.0 (GPL-2.0).
+
 import 'dart:async';
 import 'dart:io' as io;
+import 'package:Bloomee/services/license_service.dart';
 import 'package:Bloomee/blocs/downloader/cubit/downloader_cubit.dart';
 import 'package:Bloomee/blocs/global_events/global_events_cubit.dart';
 import 'package:Bloomee/blocs/internet_connectivity/cubit/connectivity_cubit.dart';
@@ -159,6 +165,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   GestureBinding.instance.resamplingEnabled = true;
   MediaKit.ensureInitialized();
+  LicenseService.registerCustomLicenses();
   runApp(const MyApp());
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Bloomee/services/license_service.dart';
 import 'package:Bloomee/core/theme/app_theme.dart';
 import 'package:Bloomee/l10n/app_localizations.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -150,7 +151,7 @@ class About extends StatelessWidget {
                     fontFamily: 'Gilroy'),
               ),
               const SizedBox(height: 12),
-              Text(
+              const Text(
                 'YOUR MUSIC. YOUR BEATS.',
                 style: TextStyle(
                   fontSize: 14,
@@ -173,6 +174,47 @@ class About extends StatelessWidget {
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Based on open-source Bloomee\nLicensed under GNU GPL v2.0',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: kSecondaryTextColor,
+                  fontSize: 11,
+                  fontFamily: 'Gilroy',
+                ),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => LicenseService.openLicenses(context),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border:
+                        Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(MingCute.certificate_line,
+                          color: kSecondaryTextColor, size: 14),
+                      SizedBox(width: 6),
+                      Text(
+                        'Open Source Licenses',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

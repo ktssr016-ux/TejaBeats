@@ -12,6 +12,7 @@ OutputDir=c:\tejamusic\BloomeeTunes-3.0.4-202\BloomeeTunes-3.0.4-202
 OutputBaseFilename=TejaBeats-Windows
 ArchitecturesInstallIn64BitMode=x64compatible
 WizardStyle=modern
+LicenseFile=LICENSE
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked

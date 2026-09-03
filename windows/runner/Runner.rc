@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "TejaBeats" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "tejabeats" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 TejaBeats. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Teja. Based on Bloomee. Licensed under GNU GPL v2.0." "\0"
             VALUE "OriginalFilename", "tejabeats.exe" "\0"
             VALUE "ProductName", "TejaBeats" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

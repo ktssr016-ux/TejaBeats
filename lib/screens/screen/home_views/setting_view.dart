@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:Bloomee/services/license_service.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_views/about.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_views/appui_setting.dart';
 import 'package:Bloomee/screens/screen/home_views/setting_views/local_music_setting.dart';
@@ -158,6 +159,13 @@ class SettingsView extends StatelessWidget {
                     icon: MingCute.github_fill,
                     iconColor: Default_Theme.accentColor2,
                     onTap: () => _navigate(context, const About()),
+                  ),
+                  _SettingsTile(
+                    title: 'Open Source Licenses',
+                    subtitle: 'License notices and third-party software',
+                    icon: MingCute.certificate_line,
+                    iconColor: Default_Theme.accentColor2,
+                    onTap: () => LicenseService.openLicenses(context),
                   ),
                 ],
               ),

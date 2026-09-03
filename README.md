@@ -57,5 +57,21 @@ flutter run -d windows
 
 ---
 
-## 📄 License
-This project is licensed under the GPL-3.0 License.
+## 📄 License & Attribution
+
+TejaBeats is an open-source project forked and modified from [Bloomee](https://github.com/HemantKarya/BloomeeTunes) by Hemant Kumar and Bloomee contributors.
+
+* **Software License:** Licensed under the **GNU General Public License Version 2.0 (GPL-2.0)**. See the complete text in the [LICENSE](LICENSE) file.
+* **Original Bloomee Code:** Copyright © 2024–2026 Hemant Kumar & Bloomee Contributors. All original notices are retained.
+* **TejaBeats Modifications:** Copyright © 2026 Teja. Details of modifications are recorded in [NOTICE.md](NOTICE.md).
+* **Third-Party Libraries & Fonts:** Third-party components used by TejaBeats are subject to their respective open-source licenses (MIT, Apache-2.0, BSD-3-Clause, SIL OFL 1.1). See [OPEN_SOURCE_LICENSES.md](OPEN_SOURCE_LICENSES.md) or the in-app **Open Source Licenses** view for full details.
+
+---
+
+## ⚠️ Third-Party Content & Media Disclaimer
+
+TejaBeats is a client audio player application. It does **not** own, host, store, or license any music tracks, audio streams, lyrics, artist metadata, or media content. 
+
+All content, media streams, and trademarks accessed through external plugins and provider services (including YouTube, JioSaavn, YouTube Music, and other third-party services) remain the sole property and copyright of their respective rights holders, artists, and platforms. 
+
+The GNU General Public License v2.0 grants permissions solely for the software source code of TejaBeats and conveys **no rights, permissions, or licenses** to any third-party media content, copyrighted music, trademarks, or proprietary service APIs.
