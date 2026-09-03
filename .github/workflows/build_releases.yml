@@ -49,11 +49,17 @@ jobs:
 
       - name: Upload Android Release Assets
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release_assets/*
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v3.0.4+207' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TejaBeats-Android-APK
+          path: release_assets/*.apk
 
   build-windows:
     runs-on: windows-latest
@@ -86,11 +92,17 @@ jobs:
 
       - name: Upload Windows Release Assets
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release_assets\TejaBeats-Windows.zip
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v3.0.4+207' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TejaBeats-Windows-ZIP
+          path: release_assets/TejaBeats-Windows.zip
 
   build-ios:
     runs-on: macos-14
@@ -123,10 +135,16 @@ jobs:
 
       - name: Upload iOS Release Asset
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: release_assets/TejaBeats-iOS.ipa
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v3.0.4+207' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TejaBeats-iOS-IPA
+          path: release_assets/TejaBeats-iOS.ipa
 
 
