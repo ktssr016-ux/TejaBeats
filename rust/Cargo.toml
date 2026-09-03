@@ -30,8 +30,8 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png",
 
 [profile.release]
 opt-level = "z"     # Optimize for size
-lto = true          # Enable Link Time Optimization
-codegen-units = 1   # Reduce parallel code generation units to increase optimization
+lto = "thin"        # Use thin LTO (faster than full LTO)
+codegen-units = 4   # Allow parallel codegen for faster builds
 panic = "abort"     # Remove panic string and unwinding code
 strip = true        # Strip symbols from binary
 

@@ -138,25 +138,27 @@ Future<void> importItems(String path) async {
 
 Future<void> setHighRefreshRate() async {
   if (io.Platform.isAndroid) {
-    await FlutterDisplayMode.setHighRefreshRate();
+    try {
+      await FlutterDisplayMode.setHighRefreshRate();
+    } catch (e) {
+      debugPrint('Could not set high refresh rate: $e');
+    }
   }
 }
 
-late BloomeePlayerCubit bloomeePlayerCubit;
+BloomeePlayerCubit? _bloomeePlayerCubit;
+BloomeePlayerCubit get bloomeePlayerCubit => _bloomeePlayerCubit!;
+
 Future<void> setupPlayerCubit() async {
   await setupAudioSession();
   final player = await PlayerInitializer().getBloomeeMusicPlayer();
-  bloomeePlayerCubit = BloomeePlayerCubit(player);
+  _bloomeePlayerCubit = BloomeePlayerCubit(player);
 }
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   GestureBinding.instance.resamplingEnabled = true;
   MediaKit.ensureInitialized();
-  await bootstrapApp();
-  setHighRefreshRate();
-  await setupPlayerCubit();
-  DiscordService.initialize();
   runApp(const MyApp());
 }
 
@@ -173,6 +175,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   StreamSubscription<SharedMedia>? _intentSub;
   SharedMedia? sharedMedia;
 
+  bool _isInitialized = false;
+
   // TODO: remove this after one or two releases.
   // Legacy migration — set to true when a default.isar file is found.
   // Remove this field (and the overlay block in build) once no users
@@ -186,19 +190,54 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      await bootstrapApp();
+    } catch (e, st) {
+      debugPrint('bootstrapApp error: $e\n$st');
+    }
+
+    try {
+      await setHighRefreshRate();
+    } catch (e, st) {
+      debugPrint('setHighRefreshRate error: $e\n$st');
+    }
+
+    try {
+      await setupPlayerCubit();
+    } catch (e, st) {
+      debugPrint('setupPlayerCubit error: $e\n$st');
+    }
+
+    try {
+      DiscordService.initialize();
+    } catch (e, st) {
+      debugPrint('DiscordService.initialize error: $e\n$st');
+    }
 
     // Check once at startup; DBProvider.appSuppDir is set by bootstrapApp().
-    _migrationPending = legacy_migration.needsMigration(
-      DBProvider.appSuppDir,
-      DBProvider.appDocDir,
-    );
-
-    _onboardingPending = !OnboardingService.onboardingDone;
-    _pluginBootstrapPending = !PluginBootstrapService.bootstrapDone;
-    //--------------------------------------------------------------------
+    try {
+      _migrationPending = legacy_migration.needsMigration(
+        DBProvider.appSuppDir,
+        DBProvider.appDocDir,
+      );
+      _onboardingPending = !OnboardingService.onboardingDone;
+      _pluginBootstrapPending = !PluginBootstrapService.bootstrapDone;
+    } catch (e, st) {
+      debugPrint('Bootstrap flags check error: $e\n$st');
+    }
 
     if (io.Platform.isAndroid) {
-      initPlatformState();
+      unawaited(initPlatformState());
+    }
+
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
     }
   }
 
@@ -274,7 +313,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _intentSub?.cancel();
-    bloomeePlayerCubit.close();
+    if (_bloomeePlayerCubit != null) {
+      _bloomeePlayerCubit!.close();
+    }
     if (io.Platform.isWindows || io.Platform.isLinux || io.Platform.isMacOS) {
       DiscordService.clearPresence();
     }
@@ -283,6 +324,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: Default_Theme().defaultThemeData,
+        home: const Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: CircularProgressIndicator(
+                color: Default_Theme.accentColor2,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     // ── Legacy migration guard ────────────────────────────────────────────
     // If a default.isar (legacy DB) exists, show the non-dismissible
     // migration overlay before starting the normal app. Once migration
@@ -291,9 +349,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // To remove this feature in future: delete the `if` block below AND the
     // import at the top of this file AND lib/services/db/legacy/.
     if (_migrationPending) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: LegacyMigrationOverlay(
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: Default_Theme().defaultThemeData,
+        home: LegacyMigrationOverlay(
           appSuppDir: DBProvider.appSuppDir,
           appDocDir: DBProvider.appDocDir,
           onComplete: (result) {
@@ -317,9 +376,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
 
     if (_pluginBootstrapPending) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: PluginBootstrapOverlay(
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: Default_Theme().defaultThemeData,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localeResolutionCallback: (locale, supportedLocales) {
+          if (locale != null) {
+            for (final supportedLocale in supportedLocales) {
+              if (supportedLocale.languageCode == locale.languageCode) {
+                return supportedLocale;
+              }
+            }
+          }
+          return const Locale('en');
+        },
+        home: PluginBootstrapOverlay(
           onComplete: () {
             if (!mounted) return;
             setState(() => _pluginBootstrapPending = false);
@@ -455,12 +527,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: BlocBuilder<BloomeePlayerCubit, BloomeePlayerState>(
         builder: (context, state) {
           if (state is BloomeePlayerInitial) {
-            return const Center(
-              child: SizedBox(
-                width: 50,
-                height: 50,
-                child: CircularProgressIndicator(
-                  color: Default_Theme.accentColor2,
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: Default_Theme().defaultThemeData,
+              home: const Scaffold(
+                backgroundColor: Default_Theme.themeColor,
+                body: Center(
+                  child: SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: CircularProgressIndicator(
+                      color: Default_Theme.accentColor2,
+                    ),
+                  ),
                 ),
               ),
             );
@@ -478,6 +557,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           AppLocalizations.localizationsDelegates,
                       supportedLocales: AppLocalizations.supportedLocales,
                       locale: locale,
+                      localeResolutionCallback: (locale, supportedLocales) {
+                        if (locale != null) {
+                          for (final supportedLocale in supportedLocales) {
+                            if (supportedLocale.languageCode ==
+                                locale.languageCode) {
+                              return supportedLocale;
+                            }
+                          }
+                        }
+                        return const Locale('en');
+                      },
                       builder: (context, child) =>
                           ResponsiveBreakpoints.builder(
                         breakpoints: [

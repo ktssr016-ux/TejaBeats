@@ -173,12 +173,20 @@ class _OnboardingOverlayState extends State<OnboardingOverlay> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: _currentLocale,
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (locale != null) {
+          for (final supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale.languageCode) {
+              return supportedLocale;
+            }
+          }
+        }
+        return const Locale('en');
+      },
       home: Builder(
         builder: (context) {
-          final l10n = AppLocalizations.of(context);
-          if (l10n == null) {
-            return const Scaffold(backgroundColor: Default_Theme.themeColor);
-          }
+          final l10n = AppLocalizations.of(context) ??
+              lookupAppLocalizations(const Locale('en'));
 
           final languageItems = _buildLanguageItems(l10n);
           final countryItems = countries.entries.toList()

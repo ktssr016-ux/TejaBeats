@@ -38,10 +38,7 @@ android {
 
     splits {
         abi {
-            isEnable = true
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86_64")
-            isUniversalApk = true
+            isEnable = false
         }
     }
     dependenciesInfo {
@@ -92,8 +89,14 @@ android {
         }
     }
 
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
+
     // To reduce the size of the APK, since from AGP 8.0.0 the default value of useLegacyPackaging is false.
-     packagingOptions {
+    packagingOptions {
         jniLibs {
             useLegacyPackaging = true
         }
